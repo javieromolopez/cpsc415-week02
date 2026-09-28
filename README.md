@@ -1,45 +1,32 @@
-# Artifact-chain template
+# OpenRouter Chat Client
 
-Starting point for major project submissions in CPSC 415 (AI Integration, Trinity College). Click **Use this template** on GitHub to create your own repository from it. Do not fork.
+**What it does and how to run it:**
+This is a single-file Java command-line chat client that sends a user question to an LLM via the OpenRouter API. It prints the model's answer and a final line displaying the model name and token usage. 
 
-The course follows Anthropic's [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook): every stage of the work leaves a short, version-controlled artifact. The agent writes most of the code. You decide what gets built, steer, verify, and explain every choice. These files are how you prove you understood what the agent built.
+To run it, set the following environment variables in PowerShell (never commit your actual API key to GitHub):
+`$env:OPENROUTER_API_KEY="your_key_here"`
+`$env:CHAT_BASE_URL="https://openrouter.ai/api/v1"`
+`$env:CHAT_MODEL="minimax/minimax-m3"`
 
-## Early labs
+Then execute the file directly:
+`java ChatClient.java "Your question here"`
 
-Week 1 uses the minimal repository described in the course handout. Later introductory labs complete only the stages assigned so far. This template describes the full chain for team projects and the final portfolio; it does not require unintroduced artifacts in Week 1. Project languages are chosen and justified, with one separate guided exercise in an unfamiliar language.
+**Intent Corrections:**
+During the intent draft phase, I corrected two open questions to define the application's boundaries:
+1. I specified that `ChatClient.java` should live at the repository root to allow for a single-file launch without a separate `javac` compilation step.
+2. I defined the missing-argument behavior: if no question is provided, the program prints a clear usage line to stderr and exits gracefully rather than crashing.
 
-## The chain
+**Code Explanation:**
+"static String buildRequestBody(String model, String question) {
+        return "{\"model\":\"" + jsonEscape(model) + "\","
+             + "\"messages\":[{\"role\":\"system\",\"content\":\"Answer like a pirate\"},"
+             + "{\"role\":\"user\",\"content\":\"" + jsonEscape(question) + "\"}],"
+             + "\"max_tokens\":100}";
+  }" 
+This block of code is which enables the system to send a chat request to the OpenRouter API. As it is not allowed to use external JSOn libraries, the agent had to build the formatted string to send the chat request.
 
-| Stage | File | Written by | Approved by |
-|---|---|---|---|
-| Plan | `intent/<name>.md` | The agent, after interviewing you | You |
-| Design | `spec.md` | The agent, from the approved intent | You, against the intent |
-| Build | `plan.md`, then code on a branch | The agent | You, before any code |
-| Test | tests, lint, CI | The agent | You confirm the loop actually ran |
-| Deploy | a pull request reviewed against `REVIEW.md` | A separate reviewing agent | You merge |
-| Maintain | a new `intent/<name>.md` | Triggered by a bug, a ticket, or a model change | You triage |
-
-`CLAUDE.md` and `REVIEW.md` travel with the repo and are graded artifacts.
-
-## Rules that are graded
-
-- Intent and spec exist before code. Plan is approved before implementation. The commit history shows it.
-- One pull request per feature, from a branch, reviewed before merge. Do not commit to `main` directly after the first commit.
-- `spec.md` states the **language** and the **model** for each component and why.
-- `ANNOTATION.md` answers the four questions for the finished project.
-- No secrets in the repo. `.claude/settings.local.json` and `.env` are ignored; the `.example` file shows the shape.
-
-## Submitting
-
-Tag the commit you are submitting and put the repository URL plus the tag on Moodle:
-
-```
-git tag tp1-submitted
-git push origin tp1-submitted
-```
-
-Tags the course uses: `intent-spec`, `tp1-submitted`, `tp2-submitted`, `portfolio-final`.
-
-## Running the agent
-
-Copy `.claude/settings.local.json.example` to `.claude/settings.local.json` and fill in your OpenRouter key and model slugs, or use the `orclaude` launcher from the [course repository](https://github.com/kousen/ai-integration-course/tree/main/scripts).
+**Model Comparison:**
+I asked the question "In one sentence, what is a context window?" to two different models:
+*   **minimax/minimax-m3:** A not very effective pirate like description, making a comparison with the sea as the tokens and the abyss swallowing those tokens. The OpenRouter Activity page showed a cost of $0.00011912 for 184 input and 80 output tokens.
+*   **anthropic/claude-sonnet-5:** Meanwhile, the description of this also pirate like desciption was more descriptive and assertive, as it related a treasure chest with the context window containing words that the model can holt all at once (setting a limit). The OpenRouter Activity page showed a cost of $0.001054 for 27 input and 100 output tokens.
+*(Note: I did not test a local model).*

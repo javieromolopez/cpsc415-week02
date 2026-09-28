@@ -106,7 +106,9 @@ public final class ChatClient {
 
     static String buildRequestBody(String model, String question) {
         return "{\"model\":\"" + jsonEscape(model) + "\","
-             + "\"messages\":[{\"role\":\"user\",\"content\":\"" + jsonEscape(question) + "\"}]}";
+             + "\"messages\":[{\"role\":\"system\",\"content\":\"Answer like a pirate\"},"
+             + "{\"role\":\"user\",\"content\":\"" + jsonEscape(question) + "\"}],"
+             + "\"max_tokens\":100}";
     }
 
     static String jsonEscape(String s) {
